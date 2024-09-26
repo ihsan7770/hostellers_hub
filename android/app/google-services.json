@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "224363027942",
+    "project_id": "hostellers-hub",
+    "storage_bucket": "hostellers-hub.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224363027942:android:59926b1126d684a8eb8a27",
+        "android_client_info": {
+          "package_name": "com.example.hostellers_hub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkeJxYRPeKNcmLfL7gnVlHDq5xTh14630"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
