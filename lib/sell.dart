@@ -271,7 +271,7 @@ class _sellState extends State<sell> {
                     ? CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _uploadProduct,
-                      child: Text('Upload Product'),
+                      child: Text('Upload Products'),
                     ),
         
         

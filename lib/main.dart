@@ -24,7 +24,7 @@ await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
   runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
+    debugShowCheckedModeBanner: false,   
     initialRoute: 'sell',
 
     
@@ -35,8 +35,9 @@ await Firebase.initializeApp(
     
     routes: {
        'login':(context) =>login() ,
-       'register':(context) =>register(),
-       'splash':(context) => SplashVeiw(),
+       'register':(context) =>register(),  
+
+      'splash':(context) => SplashVeiw(),
        'home':(context) => home(),
        'admin':(context)=>admin(),
        'userdetails':(context) => userdetails(),
