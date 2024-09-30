@@ -85,7 +85,7 @@ Future<void> fetchUserData() async {
              ListTile(
             title: const Text('My products'),
             onTap: () {
-               Navigator.pushNamed(context, 'home');
+                Navigator.pushNamed(context, 'myproducts');
 
               
             },

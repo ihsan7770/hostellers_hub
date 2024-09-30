@@ -14,7 +14,7 @@ import 'login.dart';
 import 'register.dart';
 import 'home.dart';
 import 'sell.dart';
-
+import 'myproducts.dart';
 
 
 
@@ -26,7 +26,7 @@ await Firebase.initializeApp(
 );
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,   
-    initialRoute: 'home',
+    initialRoute: 'myproducts',
 
     
     
@@ -36,13 +36,15 @@ await Firebase.initializeApp(
     
     routes: {
        'login':(context) =>login() ,
-       'register':(context) =>register(),  
+       'register':(context) =>register(),
+         
 
-      'splash':(context) => SplashVeiw(),
+       'splash':(context) => SplashVeiw(),
        'home':(context) => home(),
        'admin':(context)=>admin(),
        'userdetails':(context) => userdetails(),
-       'sell':(context)=>sell()
+       'sell':(context)=>sell(),
+       'myproducts':(context) => myproducts(), 
     },
 
 
