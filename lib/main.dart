@@ -8,13 +8,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'spalsh.dart';
 import 'Admin/admin.dart';
 import 'Admin/Userdetails.dart';
+import 'Admin/manageproduct.dart';
+import 'Admin/orderdproducts.dart';
+import 'Admin/viewfeedback.dart';
 
 import 'firebase_options.dart';
 import 'login.dart';
 import 'register.dart';
 import 'home.dart';
-import 'sell.dart';
-import 'myproducts.dart';
+import 'User/sell.dart';
+import 'User/myproducts.dart';
+import 'User/sendfeedback.dart';
 
 
 
@@ -26,7 +30,7 @@ await Firebase.initializeApp(
 );
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,   
-    initialRoute: 'myproducts',
+    initialRoute: 'sendfeedback',
 
     
     
@@ -43,8 +47,16 @@ await Firebase.initializeApp(
        'home':(context) => home(),
        'admin':(context)=>admin(),
        'userdetails':(context) => userdetails(),
+       'manageproduct':(context) => manageproduct(),
+       'orderdproducts':(context) => orderedproduct(),
+       'viewfeedback':(context) => viewfeedback(),
+       'sendfeedback':(context) => sendfeedback(),
+
+
+
        'sell':(context)=>sell(),
        'myproducts':(context) => myproducts(), 
+
     },
 
 

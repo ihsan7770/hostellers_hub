@@ -70,15 +70,11 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    // Add this to your dependencies block in the app-level build.gradle
-    // implementation 'com.google.firebase:firebase-appcheck-playintegrity:16.0.0'  // Update to the latest version
-    // implementation platform('com.google.firebase:firebase-bom:latest_version')
-    // implementation 'com.google.firebase:firebase-analytics'
-    // implementation 'com.google.firebase:firebase-auth'
-    // implementation 'com.google.firebase:firebase-firestore'
-    implementation 'com.google.android.gms:play-services-auth:20.7.0'         // Original latest version: 20.7.0
-    implementation 'com.google.android.gms:play-services-base:18.2.0'         // Original latest version: 18.2.0
-    implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
+    // implementation 'com.google.android.gms:play-services-base:18.1.0'
+    // implementation 'com.google.android.gms:play-services-basement:18.1.0'
+    // implementation 'com.google.firebase:firebase-auth:21.1.0'
+
+
     
 
     }

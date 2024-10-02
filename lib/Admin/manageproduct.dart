@@ -1,157 +1,72 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 
-class home extends StatefulWidget {
-  const home({super.key});
+class manageproduct extends StatefulWidget {
+  const manageproduct({super.key});
 
   @override
-  State<home> createState() => _homeState();
+  State<manageproduct> createState() => _manageproductState();
 }
 
-class _homeState extends State<home> {
+class _manageproductState extends State<manageproduct> {
 
-//name show function
- String? userName;
-String? userEmail;
 
-@override
-void initState() {
-  super.initState();
-  fetchUserData();
+
+  // Function to show confirmation dialog for deleting a product
+void _showDeleteProductConfirmation(BuildContext context, String productId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Confirm Deletion'),
+        content: Text('Are you sure you want to delete this product?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(), // Cancel
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                // Delete product from Firestore
+                await FirebaseFirestore.instance.collection('products').doc(productId).delete();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('Product deleted successfully.'),
+                ));
+                Navigator.of(context).pop(); // Close dialog
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('Error: ${e.toString()}'),
+                ));
+              }
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      );
+    },
+  );
 }
-
-Future<void> fetchUserData() async {
-  // Get the current user
-  User? user = FirebaseAuth.instance.currentUser;
-
-  if (user != null) {
-    // Fetch user data from Firestore
-    DocumentSnapshot users = await FirebaseFirestore.instance
-        .collection('user')
-        .doc(user.uid)
-        .get();
-
-    setState(() {
-      userName = users['Name'] ?? "No Name Found";
-      userEmail = users['Email'] ?? "No Email Found";  // Fetch email
-    });
-  }
-}
-
-
-//ends
-
-
-
+//function ends
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(backgroundColor:  Colors.amber,
-      title: Text("Home",style: TextStyle(color: Colors.white),),
+            appBar: AppBar(backgroundColor:  Colors.amber,
+      title: Text("Manage product",style: TextStyle(color: Colors.white),),
       
       centerTitle: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-       actions: [
-          
-        Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: ElevatedButton(
-            
-            style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Colors.amber[100])
-            
-            
-            ),
-            onPressed:  () {
-              Navigator.pushNamed(context, 'sell');
-            }, child: Text("Sell")),
-        ),
-      ]
-      ),
-      drawer:Drawer(
-        backgroundColor:Colors.white,
-        child: ListView(
-          
-          children: [
-            UserAccountsDrawerHeader(
-            accountName: Text('$userName'), 
-            accountEmail: Text('$userEmail'),
-            decoration: BoxDecoration(
-            color: Colors.amber, 
-            ),
-            ),
-            
-             ListTile(
-            title: const Text('My products'),
-            onTap: () {
-                Navigator.pushNamed(context, 'myproducts');
+      leading: IconButton(
+  icon: Icon(Icons.arrow_left), 
+  onPressed: () {
+ Navigator.pushNamed(context, 'admin');
+  },
+)
 
-              
-            },
-            ),
+),
 
-             ListTile(
-            title: const Text('Send feedback'),
-            onTap: () {
-                Navigator.pushNamed(context, 'sendfeedback');
-
-              
-            },
-            ),
-
-           
-           
-           
-           
-           
-           
-           
-           
-             ListTile(
-        title: const Text('Logout'),
-        onTap: () {
-                      FirebaseAuth.instance.signOut().then((value) {
-  // Ensure the user is not null before accessing the email
-  var user = FirebaseAuth.instance.currentUser;
-  
-  if (user != null) {
-    print(user.email);
-  }
-  
-  // Navigate to 'home' and remove all previous routes
-  Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
-}).catchError((error) {
-  // Handle errors if needed
-  print("Error signing out: $error");
-}
-
-
-);
-
-
-
-        },
-      ),
-
-     
-         
-         
-         
-         
-          ],
-        ),
-        
-
-       
-        
-        
-        
-        
-         ),
-      
-
-      body:Container(
+ body:Container(
         child:Column 
           (children: [
             Padding(
@@ -222,6 +137,8 @@ Future<void> fetchUserData() async {
   child: Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+     
+
       // Image Section
       Image.network(
          product['imageUrl'], // Replace with your image URL
@@ -255,7 +172,7 @@ Future<void> fetchUserData() async {
             SizedBox(height: 5),  // Space between price and description
             // Product Description
             Text(
-              product['description'],  // Replace with product description
+            " Own by ${ product['userName']}",  // Replace with product description
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[700],
@@ -268,9 +185,23 @@ Future<void> fetchUserData() async {
               children: [
                 ElevatedButton(onPressed: () {
                   
-                }, child: Text("Order")),
+                }, child: Text("Sold")),
+
+                SizedBox(
+                  width: 10,
+                ),
+                 
+                  ElevatedButton(onPressed: () {
+                     _showDeleteProductConfirmation(context, product.id);
+
+
+                  
+                }, child: Text("Delete")),
+                
               ],
-            )
+            ),
+           
+
 
 
           ],
@@ -309,8 +240,6 @@ Future<void> fetchUserData() async {
                 ),
         
       )
-            
-
 
 
 
