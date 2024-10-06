@@ -89,6 +89,22 @@ InkWell(
     child: Center(child: Text("Feedbacks", style: TextStyle(color: Colors.white,fontSize: 20),      )),
     ),
   ),
+         SizedBox(
+    height: 20,
+    width: 20,
+  ),
+
+   InkWell(
+     onTap: () {
+     Navigator.pushNamed(context, 'AdminNoti');
+  },
+    child: Container(
+    color: Colors.amber,
+    width: 250,
+    height: 80,
+    child: Center(child: Text("notifications", style: TextStyle(color: Colors.white,fontSize: 20),      )),
+    ),
+  ),
 
 
 

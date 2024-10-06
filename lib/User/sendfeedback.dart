@@ -10,17 +10,12 @@ class sendfeedback extends StatefulWidget {
 }
 
 class _sendfeedbackState extends State<sendfeedback> {
+  int _selectedRating = 0;
+  TextEditingController _feedbackController = TextEditingController();
+  final _feedkey = GlobalKey<FormState>();
+  bool _isUploading = false;
 
-   int _selectedRating = 0;
-   TextEditingController _feedbackController=TextEditingController();
-
-   final _feedkey = GlobalKey<FormState>();
-   bool _isUploading = false; 
-   
-
-    
-    
-     // Build the rating stars
+  // Build the rating stars
   Widget _buildRatingStars() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -39,238 +34,140 @@ class _sendfeedbackState extends State<sendfeedback> {
         );
       }),
     );
-  }//ends
-
-
- Future<void> _uploadFeedback() async {
-  // Check if feedback details and rating are provided
-  if (_feedbackController.text.isEmpty || _selectedRating == 0) {
-    print('Please provide all the required information.');
-    return;
   }
 
-  // Show the loading indicator while uploading
-  setState(() {
-   Future<void> _uploadFeedback() async {
-  // Check if feedback details and rating are provided
-  if (_feedbackController.text.isEmpty || _selectedRating == 0) {
-    print('Please provide all the required information.');
-    return;
-  }
-
-  // Show the loading indicator while uploading
-  setState(() {
-     _isUploading = true;
-  });
-
-  try {
-    // Get the current authenticated user's ID
-    User? currentUser = FirebaseAuth.instance.currentUser;
-
-    // Fetch the userName from the 'users' collection using the userId
-    String? userName;
-    if (currentUser != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('user')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        userName = userDoc['Name'];  // Assuming 'Name' field exists in the 'users' collection
-      }
-    }
-
-    if (userName == null) {
-      print('User not found.');
-      setState(() {
-        _isUploading = false;
-      });
+  // Upload feedback to Firestore
+  Future<void> _uploadFeedback() async {
+    if (_feedbackController.text.isEmpty || _selectedRating == 0) {
+      print('Please provide all the required information.');
       return;
     }
 
-    // Collect the feedback details
-    String feedback = _feedbackController.text;
-    int rating = _selectedRating;  // Use _selectedRating for the rating value
-
-    // Save feedback details to Firestore
-    await FirebaseFirestore.instance.collection('feedbacks').add({
-      'feedback': feedback,
-      'rating': rating,  // Save the selected rating
-      'userName': userName,  // Add the fetched userName
-      'userId': currentUser?.uid,  // Optionally add userId as well
-      'createdAt': Timestamp.now(), // Store the timestamp of feedback creation
-    });
-
-    // Print feedback details and user's name to the console
-    print('Feedback: $feedback');
-    print('Rating: $rating');
-    print('Uploaded by User: $userName');
-
-    // Reset the form and hide loading indicator
     setState(() {
-      _isUploading = false;
-      _feedbackController.clear();
-      _selectedRating = 0;  // Reset the selected rating
+      _isUploading = true; // Show loading indicator
     });
-  } catch (e) {
-    // Handle errors and hide loading indicator
-    print('Error occurred while uploading feedback: $e');
-    setState(() {
-      _isUploading = false;
-    });
-  }
-}
 
-  });
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
 
-  try {
-    // Get the current authenticated user's ID
-    User? currentUser = FirebaseAuth.instance.currentUser;
-
-    // Fetch the userName from the 'users' collection using the userId
-    String? userName;
-    if (currentUser != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        userName = userDoc['Name'];  // Assuming 'Name' field exists in the 'users' collection
+      // Fetch the userName from the 'users' collection using the userId
+      String? userName;
+      if (currentUser != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(currentUser.uid)
+            .get();
+        if (userDoc.exists) {
+          userName = userDoc['Name']; // Assuming 'Name' field exists in the 'users' collection
+        }
       }
-    }
 
-    if (userName == null) {
-      print('User not found.');
+      if (userName == null) {
+        print('User not found.');
+        setState(() {
+          _isUploading = false;
+        });
+        return;
+      }
+
+      // Collect feedback details
+      String feedback = _feedbackController.text;
+      int rating = _selectedRating;
+
+      // Save feedback to Firestore
+      await FirebaseFirestore.instance.collection('feedbacks').add({
+        'feedback': feedback,
+        'rating': rating,
+        'userName': userName,
+        'userId': currentUser?.uid,
+        'createdAt': Timestamp.now(),
+      });
+
+      // Reset the form after upload
+      setState(() {
+        _isUploading = false;
+        _feedbackController.clear();
+        _selectedRating = 0;
+      });
+
+      print('Feedback uploaded by $userName: $feedback (Rating: $rating)');
+    } catch (e) {
+      print('Error occurred while uploading feedback: $e');
       setState(() {
         _isUploading = false;
       });
-      return;
     }
-
-    // Collect the feedback details
-    String feedback = _feedbackController.text;
-    int rating = _selectedRating;  // Use _selectedRating for the rating value
-
-    // Save feedback details to Firestore
-    await FirebaseFirestore.instance.collection('feedbacks').add({
-      'feedback': feedback,
-      'rating': rating,  // Save the selected rating
-      'userName': userName,  // Add the fetched userName
-      'userId': currentUser?.uid,  // Optionally add userId as well
-      'createdAt': Timestamp.now(), // Store the timestamp of feedback creation
-    });
-
-    // Print feedback details and user's name to the console
-    print('Feedback: $feedback');
-    print('Rating: $rating');
-    print('Uploaded by User: $userName');
-
-    // Reset the form and hide loading indicator
-    setState(() {
-      _isUploading = false;
-      _feedbackController.clear();
-      _selectedRating = 0;  // Reset the selected rating
-    });
-  } catch (e) {
-    // Handle errors and hide loading indicator
-    print('Error occurred while uploading feedback: $e');
-    setState(() {
-      _isUploading = false;
-    });
   }
-}
-
-
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-                 appBar: AppBar(backgroundColor:  Colors.amber,
-      title: Text("Send feedback",style: TextStyle(color: Colors.white),),
-      
-      centerTitle: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            leading: IconButton(
-            icon: Icon(Icons.arrow_left), 
-            onPressed: () {
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        title: const Text(
+          "Send Feedback",
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_left),
+          onPressed: () {
             Navigator.pushNamed(context, 'home');
-  },
-)
-
+          },
+        ),
       ),
-      body:    Column(
-        children: [
-          SizedBox(height: 10),
-          Padding(
-                padding:  EdgeInsets.all(8.0),
-                child: Form(
-                  key:  _feedkey,
-                  child: TextFormField(
-                    maxLines: 4,
-                    controller: _feedbackController,
-                    
-                    
-                    decoration: InputDecoration(
-                      
-                    
-                      border: OutlineInputBorder(
-                            
-                            borderRadius: BorderRadius.circular(30),
-                            
+      body: _isUploading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Form(
+                    key: _feedkey,
+                    child: TextFormField(
+                      maxLines: 4,
+                      controller: _feedbackController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        hintText: "Feedbacks",
                       ),
-                      hintText: "Feedbacks"
-                      
+                      validator: (feed) {
+                        if (feed == null || feed.isEmpty) {
+                          return 'Please enter your feedback';
+                        }
+                        return null;
+                      },
                     ),
-                    validator: (feed) {
-                      if (feed == null || feed.isEmpty) {
-                        return 'Please enter your feedback';
-                      }}
-          
                   ),
                 ),
-              ),
-              SizedBox(height: 10),
-          Text(
-              'How would you rate our service?',
-              style: TextStyle(fontSize: 18),
+                const SizedBox(height: 10),
+                const Text(
+                  'How would you rate our service?',
+                  style: TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                _buildRatingStars(),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_feedkey.currentState?.validate() == true) {
+                      _uploadFeedback();
+                    }
+                  },
+                  child: const Text('Submit Feedback'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ),
+              ],
             ),
-
-              SizedBox(height: 20),
-            _buildRatingStars(),
-            SizedBox(height: 32),
-
-             ElevatedButton(
-          onPressed: () {
-            // Validate the form and upload feedback if valid
-            if (_feedkey.currentState?.validate() == true) {
-              _uploadFeedback();
-            }
-          },
-          child: Text('Submit Feedback'),
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-          ),
-        ),
-
-
-
-
-
-        ],
-      ),
-
-
-
-
     );
-
-
-    
   }
 }

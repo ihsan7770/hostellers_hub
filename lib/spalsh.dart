@@ -56,9 +56,9 @@ else{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink[100],
+      backgroundColor: Colors.amber,
       body:Center(
-        child: Text("HOSTELLERS HUB"),
+        child: Text("HOSTELLERS HUB",style:TextStyle(fontSize: 30  ) ,),
       )
     );
   }
