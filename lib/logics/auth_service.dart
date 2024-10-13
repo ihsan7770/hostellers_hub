@@ -12,33 +12,35 @@ class Authentication {
 
   // Register logic
   Future<UserCredential?> registerUser(UsersModel user) async {
-    try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: user.Email.toString(),
-        password: user.Password.toString(),
-      );
+  try {
+    // Create the user with email and password
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: user.Email.toString(),
+      password: user.Password.toString(),
+    );
 
-      if (userCredential.user != null) {
-        // Ensure that fields like 'Email' and 'Name' are not null
-        await _userCollection.doc(userCredential.user!.uid).set({
-          'Uid': userCredential.user!.uid,
-          'Email': userCredential.user!.email ?? '', // Default to empty string if null
-          'Name': user.Name ?? '', // Default to empty string if null
-          'CreatedAt': user.CreatedAt ?? DateTime.now(), // Default to current date if null
-          'Status': user.Status ?? 'active', // Default to 'active' if null
-        });
+    if (userCredential.user != null) {
+      // Ensure that fields like 'Email', 'Name', and 'Phone' are not null
+      await _userCollection.doc(userCredential.user!.uid).set({
+        'Uid': userCredential.user!.uid,
+        'Email': userCredential.user!.email ?? '', // Default to empty string if null
+        'Name': user.Name ?? '', // Default to empty string if null
+        'Phone': user.Phone ?? '', // Include phone number, default to empty string if null
+        'CreatedAt': user.CreatedAt ?? DateTime.now(), // Default to current date if null
+        'Status': user.Status ?? 'active', // Default to 'active' if null
+      });
 
-        return userCredential;
-      } else {
-        // If userCredential.user is null, return null
-        return null;
-      }
-    } catch (e) {
-      // Handle any errors here
-      print('Error registering user: $e');
+      return userCredential;
+    } else {
+      // If userCredential.user is null, return null
       return null;
     }
+  } catch (e) {
+    // Handle any errors here
+    print('Error registering user: $e');
+    return null;
   }
+}
 
 
 

@@ -183,14 +183,7 @@ void _showDeleteProductConfirmation(BuildContext context, String productId) {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton(onPressed: () {
-                  
-                }, child: Text("Sold")),
-
-                SizedBox(
-                  width: 10,
-                ),
-                 
+                
                   ElevatedButton(onPressed: () {
                      _showDeleteProductConfirmation(context, product.id);
 

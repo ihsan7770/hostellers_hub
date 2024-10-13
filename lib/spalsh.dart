@@ -14,6 +14,10 @@ class _SplashVeiwState extends State<SplashVeiw> {
   String?Email;
   String?Uid;
   String?Token;
+  bool isLoading = true; // To track loading state
+
+
+
   getDate() async{
     SharedPreferences _pref=await SharedPreferences.getInstance();
    
@@ -21,6 +25,7 @@ class _SplashVeiwState extends State<SplashVeiw> {
    Email = await _pref.getString('email');
    Uid = await _pref.getString('uid');
    Name = await _pref.getString('name');
+    bool isLoading = true; 
 
   
   
@@ -30,8 +35,13 @@ class _SplashVeiwState extends State<SplashVeiw> {
   void initState() {
   getDate();
   //make delay for token picking
-  var d = Duration(seconds: 2);
+  var d = Duration(seconds: 3);
   Future.delayed(d,(){
+     
+     setState(() {
+      isLoading = false; // Set loading to false after data is fetched
+    });
+
      checkLoginStatous();
 
   });
@@ -56,10 +66,41 @@ else{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber,
-      body:Center(
-        child: Text("HOSTELLERS HUB",style:TextStyle(fontSize: 30  ) ,),
-      )
+     
+      body: Center(
+        child: isLoading
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  const SizedBox(height: 180),
+
+                  // Display image at the top
+                  Image.asset("assets/host.png", height: 250, width: 300),
+                  const SizedBox(height: 150), // Space between image and loading indicator
+                  // Display linear progress indicator below the image
+                  Container(
+                    width: 360,
+                    child: LinearProgressIndicator(
+                      borderRadius: BorderRadius.circular(20),
+                      minHeight: 7,
+                       
+                      
+                      
+                    
+                    
+                    
+                      backgroundColor: Colors.grey[300], // Background color
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow), // Indicator color
+                    ),
+                  ),
+                  // Space between indicator and text
+                 
+                ],
+              )
+            : Image.asset("assets/host.png", height: 250, width: 250), // Show image when not loading
+      ),
+    
     );
   }
 }

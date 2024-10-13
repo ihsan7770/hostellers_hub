@@ -96,19 +96,26 @@ void _showDeleteConfirmation(BuildContext context, String userId) {
         final user = users[index];
 
         return Card(
-          color: Colors.amber,
-          child: ListTile(
-            leading: IconButton(
-              onPressed: () {
-                // Show confirmation dialog before deletion
-                _showDeleteConfirmation(context, user.id);
-              },
-              icon: Icon(Icons.delete),
-            ),
-            title: Text(user['Name']),
-            subtitle: Text(user['Email']),
-          ),
-        );
+  color: Colors.amber,
+  child: ListTile(
+    leading: IconButton(
+      onPressed: () {
+        // Show confirmation dialog before deletion
+        _showDeleteConfirmation(context, user.id);
+      },
+      icon: Icon(Icons.delete),
+    ),
+    title: Text(user['Name']), // Display the user's name
+    subtitle: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Email: ${user['Email']}'), // Display the user's email
+        Text('Phone: ${user['Phone'] ?? 'No phone number'}'), // Display the phone number, or a fallback message
+      ],
+    ),
+  ),
+);
+
       },
     );
   },

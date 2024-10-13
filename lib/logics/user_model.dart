@@ -7,6 +7,7 @@ class UsersModel {
   DateTime? CreatedAt;
   int? Status;
   String? Uid;
+  String? Phone; // Add the phone field
 
   UsersModel({
     this.Email,
@@ -15,6 +16,7 @@ class UsersModel {
     this.CreatedAt,
     this.Status,
     this.Uid,
+    this.Phone, // Add phone to constructor
   });
 
   // Factory constructor to create a UsersModel from a DocumentSnapshot
@@ -26,6 +28,7 @@ class UsersModel {
       Name: json['Name'] as String?,
       Status: json['Status'] as int?,
       CreatedAt: (json['CreatedAt'] as Timestamp?)?.toDate(),
+      Phone: json['Phone'] as String?, // Extract phone number from JSON
     );
   }
 
@@ -38,6 +41,7 @@ class UsersModel {
       "Password": Password,
       "Status": Status,
       "CreatedAt": CreatedAt != null ? Timestamp.fromDate(CreatedAt!) : null,
+      "Phone": Phone, // Include phone number in JSON
     };
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hostellers_hub/logics/auth_service.dart';
 import 'package:hostellers_hub/logics/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 class login extends StatefulWidget {
   const login({super.key});
 
@@ -57,6 +58,10 @@ class _loginState extends State<login> {
     return Scaffold(
 
       appBar: AppBar(backgroundColor:  Colors.amber,
+      title: Text("Login",style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold) ),
+     
+      
+      centerTitle: true,
        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
      
       actions: [
@@ -71,7 +76,7 @@ class _loginState extends State<login> {
             onPressed:  () {
                 Navigator.pushNamed(context, "register");
           
-                }, child: Text("Sign in")),
+                }, child:  Text("Sign In",style:TextStyle(fontSize: 15,color: Colors.blue,fontWeight: FontWeight.bold) ),),
         )]
       
       
@@ -88,34 +93,47 @@ class _loginState extends State<login> {
           children: [
 
            
+
+            Image.asset("assets/hub.png",width: 200,height: 200,),
+
+           
          
           SizedBox(
             width: 50,
             height: 50,
           ),
           
-          Padding(
-            padding:  EdgeInsets.all(8.0),
-            child: Form(
-              key:  _logkey,
-              child: TextFormField(
-                controller: _emailController,
-                
-                
-                decoration: InputDecoration(
-                
-                  border: OutlineInputBorder(
-                        
-                        borderRadius: BorderRadius.circular(30),
-                        
-                  ),
-                  hintText: "Enter user email"
-                ),
-                validator: (name) => name!.length < 6 ? 'email should be least 7 character' :null,
+        Padding(
+  padding: EdgeInsets.all(8.0),
+  child: Form(
+    key: _logkey,
+    child: TextFormField(
+      controller: _emailController,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        hintText: "Email Address",
+      ),
+      validator: (value) {
+        // Check if the email is empty
+        if (value == null || value.isEmpty) {
+          return 'Please enter your email';
+        }
+        // Regular expression for email validation
+        final RegExp emailRegex = RegExp(
+          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+        );
+        // Check if the email matches the regex
+        if (!emailRegex.hasMatch(value)) {
+          return 'Please enter a valid email address';
+        }
+        return null; // Email is valid
+      },
+    ),
+  ),
+),
 
-              ),
-            ),
-          ),
           
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -140,7 +158,7 @@ class _loginState extends State<login> {
                         borderRadius: BorderRadius.circular(30),
                         
                   ),
-                  hintText: "Enter your password"
+                  hintText: "Password"
                 ),
                 validator:(password) => password!.length < 8 ? 'password ' :null,
                
@@ -184,7 +202,7 @@ class _loginState extends State<login> {
         
               }
         
-          }, child: Text("login")),
+          }, child: Text("Login",style:TextStyle(fontSize: 17,color: Colors.white,fontWeight: FontWeight.bold) ),     ),
           
           SizedBox(
             width: 150,

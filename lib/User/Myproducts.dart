@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hostellers_hub/User/sell.dart';
 import 'package:hostellers_hub/logics/notification.dart';
+
 
 
 
@@ -14,6 +16,8 @@ class myproducts extends StatefulWidget {
 }
 
 class _myproductsState extends State<myproducts> {
+ 
+
 
   
 // Utility method to fetch user details (username) from Firestore
@@ -240,8 +244,14 @@ void _showDeleteProductConfirmation(BuildContext context, String productId) {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(onPressed: () {
-                  
-                }, child: Text("Update")),
+            // Navigate to the sell page and pass the productId to it
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => sell(productId: product.id),
+              ),
+            );
+          }, child: Text("Update")),
 
                 SizedBox(
                   width: 10,

@@ -17,6 +17,8 @@ import 'home.dart';
 import 'User/sell.dart';
 import 'User/Myproducts.dart';
 import 'User/sendfeedback.dart';
+import 'User/myorders.dart';
+import 'User/usernotification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,9 +31,9 @@ void main() async {
     debugShowCheckedModeBanner: false,
     initialRoute: 'home',
     routes: {
+      'splash': (context) => SplashVeiw(),
       'login': (context) => login(),
       'register': (context) => register(),
-      'splash': (context) => SplashVeiw(),
       'home': (context) => home(),
       'admin': (context) => admin(),
       'userdetails': (context) => userdetails(),
@@ -41,6 +43,9 @@ void main() async {
       'AdminNoti':(context) => AdminNoti(),
       'sendfeedback': (context) => sendfeedback(),
       'sell': (context) => sell(),
+      'myorders': (context) => myorders(),
+      'UserNotification':(context) =>  UserNotification(),
+
 
       // Define myproducts route with proper handling for null user
       'myproducts': (context) {

@@ -1,335 +1,201 @@
 import 'package:flutter/material.dart';
-import 'dart:io'; 
-import 'package:firebase_storage/firebase_storage.dart'; // Used for handling files in Dart (e.g., the image file)
-
-
-
-
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
-
 class sell extends StatefulWidget {
-  const sell({super.key});
+  final String? productId;
+  const sell({super.key, this.productId});
 
   @override
   State<sell> createState() => _sellState();
 }
 
 class _sellState extends State<sell> {
-  
-  TextEditingController _pnameController=TextEditingController();
-  TextEditingController _describtionController=TextEditingController();
-  TextEditingController _priceController=TextEditingController();
+  TextEditingController _pnameController = TextEditingController();
+  TextEditingController _priceController = TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+  bool _isUploading = false;
+  bool _isEdit = false;
 
-  
-  final _pnamekey = GlobalKey<FormState>();
-  final _describtionkey = GlobalKey<FormState>();
-  final _pricekey = GlobalKey<FormState>();
-
-//image
-  File? _image;  
-  final ImagePicker _picker = ImagePicker();  
-  bool _isUploading = false;  // end
- 
-  // String? _userName;  // To store the user's name fetched from Firestore
-
- 
- // Use the ImagePicker to select an image from the gallery
-    Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-  // If an image is selected, update the _image state variable
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);  // Convert the picked file to a File object
-      });
+  @override
+  void initState() {
+    super.initState();
+    if (widget.productId != null) {
+      _loadProductData();
+      _isEdit = true;
     }
   }
- //end
 
-
- /// Method to show the success dialog
-void _showSuccessDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Success'),
-        content: Text('Product added successfully!'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-            },
-            child: Text('OK'),
-          ),
-        ],
-      );
-    },
-  );
-}//end
-
-
-
-
-
-
-
-
-
-
-
-
-
-   // Function to upload the selected image and product details to Firebase Storage
- 
- 
-Future<void> _uploadProduct() async {
-  // Check if an image and product details are provided
-  if (_image == null ||
-      _pnameController.text.isEmpty ||
-      _describtionController.text.isEmpty ||
-      _priceController.text.isEmpty) {
-    print('Please provide all the required information.');
-    return;
-  }
-
-  // Show the loading indicator while uploading
-  setState(() {
-    _isUploading = true;
-  });
-
-  try {
-    // Get the current authenticated user's ID
-    User? currentUser = FirebaseAuth.instance.currentUser;
-
-    // Fetch the userName from the 'users' collection using the userId
-    String? userName;
-    if (currentUser != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('user')
-          .doc(currentUser.uid)
+  Future<void> _loadProductData() async {
+    if (widget.productId != null) {
+      DocumentSnapshot productDoc = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(widget.productId)
           .get();
-      if (userDoc.exists) {
-        userName = userDoc['Name'];  // Assuming 'name' field exists in the 'users' collection
+      if (productDoc.exists) {
+        setState(() {
+          _pnameController.text = productDoc['productName'];
+          _descriptionController.text = productDoc['description'];
+          _priceController.text = productDoc['price'].toString();
+          // If there's an image, you may fetch and display it in the UI
+        });
       }
     }
+  }
 
-    if (userName == null) {
-      print('User not found.');
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
       setState(() {
-        _isUploading = false;
+        _image = File(pickedFile.path);
       });
+    }
+  }
+
+  Future<void> _uploadProduct() async {
+    if (_pnameController.text.isEmpty ||
+        _descriptionController.text.isEmpty ||
+        _priceController.text.isEmpty ||
+        (_image == null && !_isEdit)) {
+      print('Please provide all required information.');
       return;
     }
 
-    // Create a unique file name for the image based on current time
-    String fileName = 'products/${DateTime.now().millisecondsSinceEpoch}.png';
-
-    // Reference to Firebase Storage for the image file
-    Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-
-    // Start the image upload
-    UploadTask uploadTask = storageRef.putFile(_image!);
-
-    // Wait for the upload to complete
-    TaskSnapshot snapshot = await uploadTask;
-
-    // After upload, get the file's download URL
-    String downloadUrl = await snapshot.ref.getDownloadURL();
-
-    // Collect the product details
-    String productName = _pnameController.text;
-    String description = _describtionController.text;
-    double price = double.parse(_priceController.text);
-    
-
-    // Save product details to Firestore
-    await FirebaseFirestore.instance.collection('products').add({
-      'productName': productName,
-      'description': description,
-      'price': price,
-      'imageUrl': downloadUrl,
-      'userName': userName,  // Add the fetched userName
-      'userId': currentUser?.uid,  // Optionally add userId as well
-      'createdAt': Timestamp.now(), // Store the timestamp of creation
-    });
-
-    // Print product details and image URL to the console along with the user's name
-    print('Product Name: $productName');
-    print('Description: $description');
-    print('Price: $price');
-    print('Image URL: $downloadUrl');
-    print('Uploaded by User: $userName');
-
-    // Reset the form and hide loading indicator
     setState(() {
-      _isUploading = false;
-      _image = null;  // Clear the selected image
-      _pnameController.clear();
-      _describtionController.clear();
-      _priceController.clear();
+      _isUploading = true;
     });
-  } catch (e) {
-    // Handle errors and hide loading indicator
-    print('Error occurred while uploading: $e');
-    setState(() {
-      _isUploading = false;
-    });
+
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+
+      // Upload image only if a new one is selected
+      String? downloadUrl;
+      if (_image != null) {
+        String fileName = 'products/${DateTime.now().millisecondsSinceEpoch}.png';
+        Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+        UploadTask uploadTask = storageRef.putFile(_image!);
+        TaskSnapshot snapshot = await uploadTask;
+        downloadUrl = await snapshot.ref.getDownloadURL();
+      }
+
+      String productName = _pnameController.text;
+      String description = _descriptionController.text;
+      double price = double.parse(_priceController.text);
+
+      if (_isEdit) {
+        await FirebaseFirestore.instance
+            .collection('products')
+            .doc(widget.productId)
+            .update({
+          'productName': productName,
+          'description': description,
+          'price': price,
+          if (downloadUrl != null) 'imageUrl': downloadUrl, // Update only if new image
+          'updatedAt': Timestamp.now(),
+        });
+      } else {
+        await FirebaseFirestore.instance.collection('products').add({
+          'productName': productName,
+          'description': description,
+          'price': price,
+          'imageUrl': downloadUrl,
+          'userId': currentUser?.uid,
+          'createdAt': Timestamp.now(),
+        });
+      }
+
+      setState(() {
+        _isUploading = false;
+        _image = null;
+        _pnameController.clear();
+        _descriptionController.clear();
+        _priceController.clear();
+      });
+
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error occurred while uploading: $e');
+      setState(() {
+        _isUploading = false;
+      });
+    }
   }
-}
 
-
-
- 
- 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(backgroundColor:  Colors.amber,
-      title: Text("sell",style: TextStyle(color: Colors.white),),
-      
-      centerTitle: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            leading: IconButton(
-            icon: Icon(Icons.arrow_left), 
-            onPressed: () {
-            Navigator.pushNamed(context, 'home');
-  },
-)
-
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        title: Text(
+          _isEdit ? 'Update Product' : 'Sell Product',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
-
-   body: SingleChildScrollView(
-        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-        
-          Padding(
-              padding:  EdgeInsets.all(8.0),
-              child: Form(
-                key: _pnamekey,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(8.0),
                 child: TextFormField(
                   controller: _pnameController,
-                  
-                  
                   decoration: InputDecoration(
-                  
                     border: OutlineInputBorder(
-                          
-                          borderRadius: BorderRadius.circular(30),
-                          
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    hintText: "Product name"
+                    hintText: "Product Name",
                   ),
-                  validator: (name) => name!.length < 3 ? 'Enter a valid name' :null,
-        
                 ),
               ),
-            ),
-
-            
-             Padding(
-              padding:  EdgeInsets.all(8.0),
-              child: Form(
-                key: _pricekey,
+              Padding(
+                padding: EdgeInsets.all(8.0),
                 child: TextFormField(
-                      controller: _priceController,
-                  
-                  
-                  
+                  controller: _priceController,
                   decoration: InputDecoration(
-                  
                     border: OutlineInputBorder(
-                          
-                          borderRadius: BorderRadius.circular(30),
-                          
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    hintText: "Enter product price"
+                    hintText: "Product Price",
                   ),
-                  validator: (name) => name!.length < 1 ? 'Enter a valid price' :null,
-                  keyboardType: TextInputType.number, 
-        
+                  keyboardType: TextInputType.number,
                 ),
               ),
-            ),
-        
-        
-         
-          Padding(
-              padding:  EdgeInsets.all(8.0),
-              child: Form(
-                key: _describtionkey,
+              Padding(
+                padding: EdgeInsets.all(8.0),
                 child: TextFormField(
-                  controller: _describtionController,
-                  
-                  
+                  controller: _descriptionController,
                   decoration: InputDecoration(
-                  
                     border: OutlineInputBorder(
-                          
-                          borderRadius: BorderRadius.circular(30),
-                          
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    hintText: "Enter product describtion"
+                    hintText: "Product Description",
                   ),
-                  validator: (name) => name!.length < 5 ? 'Enter a valid describtion' :null,
-        
                 ),
               ),
-            ),
-
-
-  // Display selected image or a message if no image is selected
-            _image != null
-                ? Image.file(_image!, height: 150)
-                : Text('No image selected.'),
-            SizedBox(height: 20),
-
-            // Button to pick an image
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Pick Image'),
-            ),
-              
-            
-// Show a loading indicator during upload, or show the upload button
-_isUploading
-    ? CircularProgressIndicator()
-    : ElevatedButton(
-        onPressed: () async {
-          // Call the upload method and show a dialog afterward
-          await _uploadProduct();
-          
-          // Show the popup dialog after the upload is complete
-          _showSuccessDialog(context);
-        },
-        child: Text('Upload Products'),
+              _image != null
+                  ? Image.file(_image!, height: 150)
+                  : Text(_isEdit ? 'Current image retained' : 'No image selected.'),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Pick Image'),
+              ),
+              _isUploading
+                  ? CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _uploadProduct,
+                      child: Text(_isEdit ? 'Update Product' : 'Sell Product'),
+                    ),
+            ],
+          ),
+        ),
       ),
-        
-        
-        
-        
-        ],
-        
-        
-        ),),
-      ),
-
-
-      
-
-
     );
-    
-
-
-
-
-
-
-
   }
 }
