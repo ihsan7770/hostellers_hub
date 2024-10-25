@@ -1,3 +1,5 @@
+
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,6 +21,8 @@ import 'User/Myproducts.dart';
 import 'User/sendfeedback.dart';
 import 'User/myorders.dart';
 import 'User/usernotification.dart';
+import 'User/expantproduct.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,8 +49,12 @@ void main() async {
       'sell': (context) => sell(),
       'myorders': (context) => myorders(),
       'UserNotification':(context) =>  UserNotification(),
+      'ExpandProduct':(context)=>ExpandProduct(),
 
 
+     
+     
+     
       // Define myproducts route with proper handling for null user
       'myproducts': (context) {
         final User? user = FirebaseAuth.instance.currentUser; // Nullable type

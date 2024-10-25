@@ -90,6 +90,8 @@ class _sendfeedbackState extends State<sendfeedback> {
         _selectedRating = 0;
       });
 
+      _showSuccessDialog();
+
       print('Feedback uploaded by $userName: $feedback (Rating: $rating)');
     } catch (e) {
       print('Error occurred while uploading feedback: $e');
@@ -99,19 +101,41 @@ class _sendfeedbackState extends State<sendfeedback> {
     }
   }
 
+
+  // Show a popup dialog for feedback submission success
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Feedback Sent'),
+          content: const Text('Thank you for your feedback!'),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.amber,
         title: const Text(
-          "Send Feedback",
-          style: TextStyle(color: Colors.white),
+          " Feedback",
+          style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold)
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_left),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushNamed(context, 'home');
           },
@@ -158,7 +182,7 @@ class _sendfeedbackState extends State<sendfeedback> {
                       _uploadFeedback();
                     }
                   },
-                  child: const Text('Submit Feedback'),
+                  child: const Text('Send'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(

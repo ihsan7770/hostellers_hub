@@ -9,6 +9,9 @@ class orderedproduct extends StatefulWidget {
 }
 
 class _orderedproductState extends State<orderedproduct> {
+  // Track the sold status for each order
+  Map<String, bool> soldStatus = {};
+
   // Function to send a notification to the user who bought the product
   Future<void> _notifyUser(String userId, String productName) async {
     try {
@@ -35,7 +38,10 @@ class _orderedproductState extends State<orderedproduct> {
   Future<void> _markAsSold(String orderId, String productId) async {
     try {
       // Fetch the product document to get the user ID
-      DocumentSnapshot productDoc = await FirebaseFirestore.instance.collection('deleted_products').doc(productId).get();
+      DocumentSnapshot productDoc = await FirebaseFirestore.instance
+          .collection('deleted_products')
+          .doc(productId)
+          .get();
 
       if (productDoc.exists) {
         // Get the user ID from the product document
@@ -53,6 +59,11 @@ class _orderedproductState extends State<orderedproduct> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Product marked as sold.')),
         );
+
+        // Update the sold status locally for this order
+        setState(() {
+          soldStatus[orderId] = true;
+        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Product not found.')),
@@ -73,7 +84,7 @@ class _orderedproductState extends State<orderedproduct> {
         backgroundColor: Colors.amber,
         title: Text(
           "Ordered Products",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -90,9 +101,7 @@ class _orderedproductState extends State<orderedproduct> {
           children: [
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('orders') // Use 'orders' collection
-                    .snapshots(),
+                stream: FirebaseFirestore.instance.collection('orders').snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -108,6 +117,7 @@ class _orderedproductState extends State<orderedproduct> {
                     itemCount: orders.length,
                     itemBuilder: (context, index) {
                       final order = orders[index];
+                      final orderId = order.id;
 
                       return Container(
                         padding: EdgeInsets.all(10),
@@ -157,8 +167,8 @@ class _orderedproductState extends State<orderedproduct> {
                                   Text(
                                     "Ordered by: ${order['userName']}", // Display user name
                                     style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[700],
+                                      fontSize: 17,
+                                      color: Colors.blue,
                                     ),
                                   ),
                                   SizedBox(height: 5),
@@ -172,13 +182,22 @@ class _orderedproductState extends State<orderedproduct> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          // Call the mark as sold function with the required parameters
-                                          _markAsSold(order.id, order['productId']); // Pass the productId from the order
-                                        },
-                                        child: Text("Sold"),
-                                      ),
+                                      soldStatus[orderId] == true
+                                          ? Text(
+                                              "Solded", // Show "Sold" text if the product is marked as sold
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                color: Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            )
+                                          : ElevatedButton(
+                                              onPressed: () {
+                                                // Call the mark as sold function with the required parameters
+                                                _markAsSold(order.id, order['productId']); // Pass the productId from the order
+                                              },
+                                              child: Text("Sold"),
+                                            ),
                                     ],
                                   ),
                                 ],

@@ -13,12 +13,12 @@ class _viewfeedbackState extends State<viewfeedback> {
   Widget build(BuildContext context) {
     return Scaffold(                
        appBar: AppBar(backgroundColor:  Colors.amber,
-      title: Text("viewFeedbacks",style: TextStyle(color: Colors.white),),
+      title: Text("Feedbacks",style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold),),
       
       centerTitle: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       leading: IconButton(
-  icon: Icon(Icons.arrow_left), 
+  icon: Icon(Icons.arrow_back), 
   onPressed: () {
  Navigator.pushNamed(context, 'admin');
   },
@@ -47,14 +47,16 @@ body:  StreamBuilder<QuerySnapshot>(
               final feedback = feedbacks[index];
 
               return Card(
-                color: Colors.amber[100],
+                
                 child: ListTile(
-                  title: Text(feedback['userName']),
+                  title: Text(feedback['userName'],style:TextStyle(fontSize: 25,color: Colors.blue,fontWeight: FontWeight.bold)),
+
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Feedback: ${feedback['feedback']}'),
-                      Text('Rating: ${feedback['rating']}'),
+                      SizedBox(height: 15,),
+                      Text(feedback['feedback'],style:TextStyle(fontSize: 17,color: Colors.black,fontWeight: FontWeight.bold)),
+                      Text('Rating: ${feedback['rating']}',style:TextStyle(fontSize: 15,color: Colors.black,fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),

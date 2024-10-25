@@ -107,8 +107,8 @@ Future<void> cancelOrderAndRestoreProduct(String orderId, String productDocId) a
       appBar: AppBar(
         backgroundColor: Colors.amber,
         title: const Text(
-          "My Orders",
-          style: TextStyle(color: Colors.white),
+          "Orders",
+         style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold)
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),

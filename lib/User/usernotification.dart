@@ -85,13 +85,13 @@ class _UserNotificationState extends State<UserNotification> {
       appBar: AppBar(
         backgroundColor: Colors.amber,
         title: Text(
-          "User Notifications",
-          style: TextStyle(color: Colors.white),
+          "Notifications",
+         style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold)
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_left),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushNamed(context, 'home');
           },

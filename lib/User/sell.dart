@@ -21,6 +21,9 @@ class _sellState extends State<sell> {
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
   bool _isEdit = false;
+  bool _isImageSelected = false;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -42,7 +45,6 @@ class _sellState extends State<sell> {
           _pnameController.text = productDoc['productName'];
           _descriptionController.text = productDoc['description'];
           _priceController.text = productDoc['price'].toString();
-          // If there's an image, you may fetch and display it in the UI
         });
       }
     }
@@ -53,16 +55,17 @@ class _sellState extends State<sell> {
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
+        _isImageSelected = true;
       });
     }
   }
 
   Future<void> _uploadProduct() async {
-    if (_pnameController.text.isEmpty ||
-        _descriptionController.text.isEmpty ||
-        _priceController.text.isEmpty ||
-        (_image == null && !_isEdit)) {
-      print('Please provide all required information.');
+  if (_formKey.currentState!.validate()) {
+    if (_image == null && !_isEdit) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an image')),
+      );
       return;
     }
 
@@ -72,9 +75,17 @@ class _sellState extends State<sell> {
 
     try {
       User? currentUser = FirebaseAuth.instance.currentUser;
-
-      // Upload image only if a new one is selected
       String? downloadUrl;
+
+      // Fetch the user's name from Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(currentUser?.uid)
+          .get();
+
+      String userName = userDoc['Name']; // Assuming 'userName' field exists in 'users' collection
+
+      // Upload image if a new one is selected
       if (_image != null) {
         String fileName = 'products/${DateTime.now().millisecondsSinceEpoch}.png';
         Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
@@ -87,27 +98,32 @@ class _sellState extends State<sell> {
       String description = _descriptionController.text;
       double price = double.parse(_priceController.text);
 
-      if (_isEdit) {
-        await FirebaseFirestore.instance
-            .collection('products')
-            .doc(widget.productId)
-            .update({
-          'productName': productName,
-          'description': description,
-          'price': price,
-          if (downloadUrl != null) 'imageUrl': downloadUrl, // Update only if new image
-          'updatedAt': Timestamp.now(),
-        });
-      } else {
-        await FirebaseFirestore.instance.collection('products').add({
-          'productName': productName,
-          'description': description,
-          'price': price,
-          'imageUrl': downloadUrl,
-          'userId': currentUser?.uid,
-          'createdAt': Timestamp.now(),
-        });
-      }
+    if (_isEdit) {
+          await FirebaseFirestore.instance
+              .collection('products')
+              .doc(widget.productId)
+              .update({
+            'productName': productName,
+            'description': description,
+            'price': price,
+            if (downloadUrl != null) 'imageUrl': downloadUrl,
+            'updatedAt': Timestamp.now(),
+          });
+        } else {
+          // Generate a new product ID if not provided
+          String newProductId = widget.productId ?? FirebaseFirestore.instance.collection('products').doc().id;
+          
+          await FirebaseFirestore.instance.collection('products').doc(newProductId).set({
+            'productId': newProductId,
+            'productName': productName,
+            'description': description,
+            'price': price,
+            'imageUrl': downloadUrl,
+            'userId': currentUser?.uid,
+            'userName': userName, // Add the userName field
+            'createdAt': Timestamp.now(),
+          });
+        }
 
       setState(() {
         _isUploading = false;
@@ -125,74 +141,119 @@ class _sellState extends State<sell> {
       });
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.amber,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushNamed(context, 'home');
+          },
+        ),
         title: Text(
           _isEdit ? 'Update Product' : 'Sell Product',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
       body: SingleChildScrollView(
         child: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: TextFormField(
-                  controller: _pnameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    controller: _pnameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      hintText: "Name",
                     ),
-                    hintText: "Product Name",
+                    validator: (name) {
+                      if (name == null || name.isEmpty) {
+                        return 'Please enter your name';
+                      } else if (name.length < 3) {
+                        return 'Name must be at least 3 characters';
+                      }
+                      return null;
+                    },
                   ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: TextFormField(
-                  controller: _priceController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    controller: _priceController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      hintText: "Price",
                     ),
-                    hintText: "Product Price",
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    hintText: "Product Description",
+                    keyboardType: TextInputType.number,
+                    validator: (price) {
+                      if (price == null || price.isEmpty) {
+                        return 'Please enter a price';
+                      } else if (double.tryParse(price) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      return null;
+                    },
                   ),
                 ),
-              ),
-              _image != null
-                  ? Image.file(_image!, height: 150)
-                  : Text(_isEdit ? 'Current image retained' : 'No image selected.'),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: Text('Pick Image'),
-              ),
-              _isUploading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _uploadProduct,
-                      child: Text(_isEdit ? 'Update Product' : 'Sell Product'),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      hintText: "Description",
                     ),
-            ],
+                    validator: (description) {
+                      if (description == null || description.isEmpty) {
+                        return 'Please enter a description';
+                      } else if (description.length < 10) {
+                        return 'Description must be at least 10 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                _image != null
+                    ? Image.file(_image!, height: 150)
+                    : Text(_isEdit ? 'Current image retained' : 'No image selected.'),
+                if (!_isImageSelected)
+                  IconButton(
+                    icon: Icon(
+                      Icons.upload_file,
+                      size: 200,
+                      color: Colors.blue,
+                    ),
+                    onPressed: _pickImage,
+                    tooltip: 'Upload Image',
+                  ),
+                if (_isImageSelected)
+                  Text(
+                    'Image selected!',
+                    style: TextStyle(fontSize: 24.0, color: Colors.green),
+                  ),
+                _isUploading
+                    ? CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _uploadProduct,
+                        child: Text(_isEdit ? 'Update Product' : 'Sell Product'),
+                      ),
+              ],
+            ),
           ),
         ),
       ),

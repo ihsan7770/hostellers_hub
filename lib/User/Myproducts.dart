@@ -148,8 +148,8 @@ void _showDeleteProductConfirmation(BuildContext context, String productId) {
       appBar: AppBar(
         backgroundColor: Colors.amber,
         title: Text(
-          "My Products",
-          style: TextStyle(color: Colors.white),
+          "Products",
+          style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),

@@ -72,7 +72,7 @@ void _register() async {
       centerTitle: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
          leading: IconButton(
-  icon: Icon(Icons.arrow_left), 
+  icon: Icon(Icons.arrow_back), 
   onPressed: () {
   Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
   },

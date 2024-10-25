@@ -61,12 +61,12 @@ void _showDeleteConfirmation(BuildContext context, String userId) {
   Widget build(BuildContext context) {
     return  Scaffold(
        appBar: AppBar(backgroundColor:  Colors.amber,
-      title: Text("Userdetails",style: TextStyle(color: Colors.white),),
+      title: Text("Users",style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold),),
       
       centerTitle: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       leading: IconButton(
-  icon: Icon(Icons.arrow_left), 
+  icon: Icon(Icons.arrow_back), 
   onPressed: () {
  Navigator.pushNamed(context, 'admin');
   },
@@ -96,21 +96,21 @@ void _showDeleteConfirmation(BuildContext context, String userId) {
         final user = users[index];
 
         return Card(
-  color: Colors.amber,
+  
   child: ListTile(
     leading: IconButton(
       onPressed: () {
         // Show confirmation dialog before deletion
         _showDeleteConfirmation(context, user.id);
       },
-      icon: Icon(Icons.delete),
+      icon: Icon(Icons.delete,size: 30,),
     ),
-    title: Text(user['Name']), // Display the user's name
+    title: Text(user['Name'],style:TextStyle(fontSize: 25,color: Colors.blue,fontWeight: FontWeight.bold)), // Display the user's name
     subtitle: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Email: ${user['Email']}'), // Display the user's email
-        Text('Phone: ${user['Phone'] ?? 'No phone number'}'), // Display the phone number, or a fallback message
+        Text(user['Email'],style:TextStyle(fontSize: 17,color: Colors.black,fontWeight: FontWeight.bold)), // Display the user's email
+        Text(user['Phone'],style:TextStyle(fontSize: 17,color: Colors.black,fontWeight: FontWeight.bold)), // Display the phone number, or a fallback message
       ],
     ),
   ),
