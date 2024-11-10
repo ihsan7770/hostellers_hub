@@ -169,59 +169,63 @@ class _HomeState extends State<home> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         actions: [
        
+StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance
+      .collection('notifications_user')
+      .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+      .where('read', isEqualTo: false) // Show only unread notifications
+      .snapshots(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(child: CircularProgressIndicator());
+    }
 
-  //  StreamBuilder<QuerySnapshot>(
-  //     stream: FirebaseFirestore.instance
-  //         .collection('notifications_user')
-  //         .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-  //         .snapshots(),
-  //     builder: (context, snapshot) {
-  //       if (snapshot.connectionState == ConnectionState.waiting) {
-  //         return Center(child: CircularProgressIndicator());
-  //       }
+    if (snapshot.hasError) {
+      return IconButton(
+        onPressed: () {},
+        icon: Icon(Icons.notifications),
+      );
+    }
 
-  //       if (snapshot.hasError) {
-  //         return IconButton(
-  //           onPressed: () {},
-  //           icon: Icon(Icons.notifications),
-  //         );
-  //       }
+    // Get the list of unread notifications and count them
+    var notifications = snapshot.data?.docs ?? [];
+    var notificationCount = notifications.length;
 
-  //       // Update notificationCount without calling setState()
-  //       var notifications = snapshot.data?.docs ?? [];
-  //       var notificationCount = notifications.length;
+    return badges.Badge(
+      badgeContent: Text(
+        notificationCount > 0 ? '$notificationCount' : '',
+        style: TextStyle(color: Colors.white, fontSize: 10),
+      ),
+      badgeStyle: badges.BadgeStyle(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      // Show badge only if there are unread notifications
+      showBadge: notificationCount > 0,
+      child: IconButton(
+        onPressed: () async {
+          // Navigate to UserNotification and mark all notifications as read
+          await Navigator.pushNamed(context, 'UserNotification');
 
-  //       return badges.Badge(
-  //         badgeContent: Text(
-  //           notificationCount > 0 ? '$notificationCount' : '',
-  //           style: TextStyle(color: Colors.white, fontSize: 10),
-  //         ),
-  //         badgeStyle: badges.BadgeStyle(
-  //           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-  //           borderRadius: BorderRadius.circular(20),
-  //         ),
-  //          // Only show badge if notifications exist
-  //         child: IconButton(
-  //           onPressed: () async {
-  //             // Navigate to UserNotification and reset notification count after navigation
-  //             await Navigator.pushNamed(context, 'UserNotification');
-  //             setState(() {
-  //              bool notificationCount = false; // Reset notification count to 0 after returning
-  //             });
+          // Update Firestore to mark notifications as read
+          for (var doc in notifications) {
+            doc.reference.update({'read': true});
+          }
+        },
+        icon: Icon(Icons.notifications, size: 30),
+      ),
+    );
+  },
+)
+
+
+
+  // IconButton(
+  //           onPressed: () {
+  //             Navigator.pushNamed(context, 'UserNotification');
   //           },
   //           icon: Icon(Icons.notifications, size: 30),
   //         ),
-  //         showBadge: notificationCount,
-  //       );
-  //     },
-  //   )
-
-  IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, 'UserNotification');
-            },
-            icon: Icon(Icons.notifications, size: 30),
-          ),
       
 
 
@@ -248,7 +252,7 @@ class _HomeState extends State<home> {
             backgroundColor: Colors.amber, // Background color of button
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Position of FAB
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat, // Position of FAB
 
 
 

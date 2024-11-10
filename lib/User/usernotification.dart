@@ -13,6 +13,14 @@ class _UserNotificationState extends State<UserNotification> {
   // Get the current user's ID
   final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
+  // Function to delete a notification
+  Future<void> _deleteNotification(String docId) async {
+    await FirebaseFirestore.instance
+        .collection('notifications_user')
+        .doc(docId)
+        .delete();
+  }
+
   // StreamBuilder to listen to the notifications collection
   Widget _buildNotificationsStream() {
     return StreamBuilder<QuerySnapshot>(
@@ -35,10 +43,11 @@ class _UserNotificationState extends State<UserNotification> {
           itemCount: notifications.length,
           itemBuilder: (context, index) {
             final notification = notifications[index];
+            final docId = notification.id;
 
             return Container(
-              padding: EdgeInsets.all(10),
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              padding: EdgeInsets.all(20),
+              margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
@@ -51,24 +60,51 @@ class _UserNotificationState extends State<UserNotification> {
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Uncomment if you want to display the product name
-                  // Text(
-                  //   notification['productName'], // Display product name
-                  //   style: TextStyle(
-                  //     fontSize: 18,
-                  //     fontWeight: FontWeight.bold,
-                  //   ),
-                  // ),
-                  SizedBox(height: 5),
-                  Text(
-                    notification['message'], // Display the corresponding message
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 5),
+                        Text(
+                          notification['message'], // Display the corresponding message
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, ),
+                    onPressed: () async {
+                      // Show confirmation dialog before deleting
+                      final confirmDelete = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text("Delete Notification"),
+                          content: Text("Are you sure you want to delete this notification?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text("Delete"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      // If confirmed, delete the notification
+                      if (confirmDelete == true) {
+                        _deleteNotification(docId);
+                      }
+                    },
                   ),
                 ],
               ),
@@ -86,7 +122,7 @@ class _UserNotificationState extends State<UserNotification> {
         backgroundColor: Colors.amber,
         title: Text(
           "Notifications",
-         style:TextStyle(fontSize: 25,color: Colors.white,fontWeight: FontWeight.bold)
+          style: TextStyle(fontSize: 25, color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),

@@ -9,18 +9,15 @@ class orderedproduct extends StatefulWidget {
 }
 
 class _orderedproductState extends State<orderedproduct> {
-  // Track the sold status for each order
   Map<String, bool> soldStatus = {};
 
-  // Function to send a notification to the user who bought the product
   Future<void> _notifyUser(String userId, String productName) async {
     try {
-      // Create a notification for the user
       await FirebaseFirestore.instance.collection('notifications_user').add({
         'userId': userId,
         'message': 'Your product "$productName" has been marked as sold!',
         'timestamp': Timestamp.now(),
-        'isRead': false, // The user can mark it as read later
+        'isRead': false,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -34,33 +31,27 @@ class _orderedproductState extends State<orderedproduct> {
     }
   }
 
-  // Function to mark the product as sold
   Future<void> _markAsSold(String orderId, String productId) async {
     try {
-      // Fetch the product document to get the user ID
       DocumentSnapshot productDoc = await FirebaseFirestore.instance
           .collection('deleted_products')
           .doc(productId)
           .get();
 
       if (productDoc.exists) {
-        // Get the user ID from the product document
-        String userId = productDoc['userId']; // Adjust this field based on your Firestore structure
-        String productName = productDoc['productName']; // Fetch the product name as well
+        String userId = productDoc['userId'];
+        String productName = productDoc['productName'];
 
-        // Update the order status in the Firestore
         await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
           'isSold': true,
         });
 
-        // Notify the user that the product has been marked as sold
         await _notifyUser(userId, productName);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Product marked as sold.')),
         );
 
-        // Update the sold status locally for this order
         setState(() {
           soldStatus[orderId] = true;
         });
@@ -119,6 +110,12 @@ class _orderedproductState extends State<orderedproduct> {
                       final order = orders[index];
                       final orderId = order.id;
 
+                      // Safely initialize sold status for each order, default to false if not present
+                      if (!soldStatus.containsKey(orderId)) {
+                        soldStatus[orderId] = (order.data() as Map<String, dynamic>).containsKey('isSold') && order['isSold'] == true;
+
+                      }
+
                       return Container(
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -138,7 +135,7 @@ class _orderedproductState extends State<orderedproduct> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Image.network(
-                              order['productImage'], // Display product image from order
+                              order['productImage'],
                               width: 100,
                               height: 100,
                               fit: BoxFit.cover,
@@ -149,7 +146,7 @@ class _orderedproductState extends State<orderedproduct> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    order['productName'], // Display product name
+                                    order['productName'],
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -157,7 +154,7 @@ class _orderedproductState extends State<orderedproduct> {
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    "Rs${order['productPrice'].toString()}", // Display product price
+                                    "Rs${order['productPrice'].toString()}",
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Colors.green,
@@ -165,7 +162,7 @@ class _orderedproductState extends State<orderedproduct> {
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    "Ordered by: ${order['userName']}", // Display user name
+                                    "Ordered by: ${order['userName']}",
                                     style: TextStyle(
                                       fontSize: 17,
                                       color: Colors.blue,
@@ -173,7 +170,7 @@ class _orderedproductState extends State<orderedproduct> {
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    "Order Date: ${DateTime.parse(order['orderDate']).toLocal().toString()}", // Display order date
+                                    "Order Date: ${DateTime.parse(order['orderDate']).toLocal().toString()}",
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey[700],
@@ -184,7 +181,7 @@ class _orderedproductState extends State<orderedproduct> {
                                     children: [
                                       soldStatus[orderId] == true
                                           ? Text(
-                                              "Solded", // Show "Sold" text if the product is marked as sold
+                                              "Solded",
                                               style: TextStyle(
                                                 fontSize: 20,
                                                 color: Colors.green,
@@ -193,8 +190,7 @@ class _orderedproductState extends State<orderedproduct> {
                                             )
                                           : ElevatedButton(
                                               onPressed: () {
-                                                // Call the mark as sold function with the required parameters
-                                                _markAsSold(order.id, order['productId']); // Pass the productId from the order
+                                                _markAsSold(order.id, order['productId']);
                                               },
                                               child: Text("Sold"),
                                             ),

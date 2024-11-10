@@ -76,7 +76,7 @@ void _showDeleteNotificationConfirmation(BuildContext context, String notificati
       centerTitle: true,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       leading: IconButton(
-  icon: Icon(Icons.arrow_left), 
+  icon: Icon(Icons.arrow_back), 
   onPressed: () {
  Navigator.pushNamed(context, 'admin');
   },
@@ -104,7 +104,7 @@ body:  StreamBuilder<QuerySnapshot>(
                 // Extracting notification details
                 String productId = notification['productId'];
                 String productName = notification['productName'];
-                String notificationId =  notification['notificationId'];
+                String notificationId = notification.id;
                 // String description = notification['description'];
                 double price = notification['price'];
                 String imageUrl = notification['imageUrl'];

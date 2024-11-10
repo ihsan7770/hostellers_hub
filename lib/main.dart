@@ -33,7 +33,7 @@ void main() async {
 
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    initialRoute: 'home',
+    initialRoute: 'admin',
     routes: {
       'splash': (context) => SplashVeiw(),
       'login': (context) => login(),
