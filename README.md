@@ -1,16 +1,8 @@
 # hostellers_hub
 
-A new Flutter project.
+A new Flutter project. The primary objective of this project is to develop a user-friendly digital platform tailored for hostellers to buy and sell second-hand products. This platform aims to streamline the exchange of essential items such as beds, pillows, study tables, and more among students. By fostering a sustainable and cost-effective marketplace within hostel communities, the platform ensures affordability, convenience, and accessibility. It addresses the common challenges faced by students in acquiring necessary items during their stay, while also promoting reuse and responsible consumption.
 
-## Getting Started
+## Images
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
