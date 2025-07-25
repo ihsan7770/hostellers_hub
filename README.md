@@ -4,6 +4,6 @@ A new Flutter project. The primary objective of this project is to develop a use
 
 ## Images User Side
 
-![App Screenshot](https://github.com/ihsan7770/hostellers_hub/blob/d90c8065d1d821722a8c3afee5b8497036c00b27/hostellers%20hub%20user.png?raw=true)
+![App Screenshot](https://github.com/ihsan7770/hostellers_hub/blob/4114be740d7c1d4c9333505406e3d0529081da80/Hostellers.png?raw=true)
 
 
